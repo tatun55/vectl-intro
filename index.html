@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VectL コミュニティ 紹介スライド</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gh: {
+            bg: '#FFFFFF',
+            sub: '#F6F8FA',
+            border: '#D0D7DE',
+            text: '#1F2328',
+            muted: '#656D76',
+            accent: '#0969DA',
+            accentLight: '#54AEFF',
+            accentDark: '#0550AE',
+            success: '#1A7F37',
+            error: '#CF222E',
+            }
+          },
+          fontFamily: {
+            display: ['Inter', 'Noto Sans JP', 'sans-serif'],
+            body: ['Inter', 'Noto Sans JP', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    ::selection { background-color: #54AEFF; color: #FFFFFF; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    .slides-container {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .slides-container::-webkit-scrollbar { display: none; }
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      min-width: 100vw;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      background: #000;
+      scroll-snap-align: start;
+    }
+    .slide-inner {
+      width: 1280px;
+      height: 720px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      transform: scale(var(--slide-scale, 1));
+      transform-origin: center center;
+    }
+    .slide-inner.justify-center-inner {
+      justify-content: center;
+    }
+    :fullscreen .slide-inner,
+    :-webkit-full-screen .slide-inner {
+      border-radius: 0 !important;
+    }
+
+    .dot-grid::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      background-image: radial-gradient(circle, #1F2328 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+
+    .grain::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.3s; }
+    .reveal-d4 { transition-delay: 0.4s; }
+    .reveal-d5 { transition-delay: 0.5s; }
+    .reveal-d6 { transition-delay: 0.6s; }
+
+    .thumb-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100px;
+      z-index: 60;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 10px 12px;
+      gap: 8px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.15) transparent;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    .thumb-panel.open { transform: translateY(0); }
+    .thumb-panel::-webkit-scrollbar { height: 3px; }
+    .thumb-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+    .thumb-item {
+      flex-shrink: 0;
+      cursor: pointer;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: border-color 0.2s, opacity 0.2s;
+      opacity: 0.6;
+      position: relative;
+    }
+    .thumb-item:hover { opacity: 0.9; }
+    .thumb-item.active {
+      border-color: #0969DA;
+      opacity: 1;
+    }
+
+    .thumb-toggle {
+      position: fixed;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 65;
+      width: 56px;
+      height: 28px;
+      border-radius: 8px 8px 0 0;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-bottom: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: rgba(255,255,255,0.35);
+    }
+    .thumb-toggle:hover {
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.8);
+    }
+    .thumb-panel.open ~ .thumb-toggle {
+      bottom: 100px;
+    }
+
+    .slide-nav { display: none; }
+
+    .fs-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 60;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: rgba(255,255,255,0.5);
+    }
+    .fs-btn:hover {
+      background: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* Target switcher (inside thumb panel) */
+    .target-switcher-inline {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 6px 4px;
+      flex-shrink: 0;
+      border-right: 1px solid rgba(255,255,255,0.08);
+      margin-right: 4px;
+    }
+    .target-btn {
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-size: 9px;
+      font-weight: 600;
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      color: rgba(255,255,255,0.35);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      background: transparent;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+    .target-btn:hover {
+      color: rgba(255,255,255,0.7);
+    }
+    .target-btn.active {
+      background: rgba(9,105,218,0.25);
+      color: #54AEFF;
+    }
+
+    /* Plan card hover */
+    .plan-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .plan-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -12px rgba(9,105,218,0.12);
+    }
+
+    .icon-check { color: #0969DA; }
+    .icon-dash { color: #D0D7DE; }
+
+    @media print {
+      @page { size: 1280px 720px; margin: 0; }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 1280px !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      .slide-nav, .key-hint, .thumb-panel, .thumb-toggle, #slideNav { display: none !important; }
+      .slides-container {
+        display: block !important;
+        width: 1280px !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      .slide {
+        width: 1280px !important;
+        height: 720px !important;
+        min-width: 1280px !important;
+        min-height: 720px !important;
+        max-width: 1280px !important;
+        max-height: 720px !important;
+        page-break-after: always;
+        break-after: page;
+        display: block !important;
+        overflow: hidden !important;
+      }
+      .slide-inner {
+        transform: none !important;
+        scale: none !important;
+        width: 1280px !important;
+        height: 720px !important;
+      }
+      .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gh-bg text-gh-text font-body antialiased overflow-x-hidden">
+
+  <nav class="slide-nav" id="slideNav"></nav>
+
+  <!-- Thumbnail Panel -->
+  <div class="thumb-panel" id="thumbPanel"></div>
+  <button class="thumb-toggle" id="thumbToggle" title="サムネイル表示 (T)">
+    <svg class="w-4 h-4" id="thumbToggleIcon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>
+  </button>
+
+  <!-- Fullscreen Button -->
+  <button class="fs-btn" id="fsBtn" title="フルスクリーン (F)">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>
+  </button>
+
+  <!-- Keyboard Hint -->
+  <div class="key-hint flex items-center gap-2 text-xs font-medium font-display" style="position:fixed;bottom:48px;left:50%;transform:translateX(-50%);z-index:50;opacity:0.4;color:rgba(255,255,255,0.35)">
+    <span class="px-1.5 py-0.5 rounded text-[10px]" style="border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)">&larr; &rarr;</span>
+    <span>スライド移動</span>
+    <span class="px-1.5 py-0.5 rounded text-[10px] ml-1" style="border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)">T</span>
+    <span>サムネイル</span>
+    <span class="px-1.5 py-0.5 rounded text-[10px] ml-1" style="border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06)">F</span>
+    <span>フルスクリーン</span>
+    
+  </div>
+
+  <div class="slides-container" id="slidesContainer">
+
+  <!-- SLIDE: Message + Image -->
+  <section class="slide" id="s1">
+    <div class="slide-inner bg-gh-bg " style="padding:40px 64px;">
+      <div>
+        <div class="reveal">
+          <span class="text-lg text-gh-accent font-display" style="font-weight:600">VectL とは</span>
+        </div>
+        <p class="reveal reveal-d1 mt-3 font-display text-5xl font-900 tracking-tight leading-snug text-gh-text">「いい人が損する」を、終わらせる。</p>
+      </div>
+
+      
+      <div class="reveal reveal-d2 flex-1 flex items-center">
+        <img src="sakura-step-p1-A_v4.png" alt="" style="width:100%;max-height:100%;object-fit:contain;object-position:left center;">
+      </div>
+      
+
+      
+
+      <div class="absolute bottom-6 right-8 text-xs text-gh-border font-display font-600">01 / 03</div>
+    </div>
+  </section>
+
+
+  <!-- SLIDE: Message + Image -->
+  <section class="slide" id="s2">
+    <div class="slide-inner bg-gh-bg " style="padding:40px 64px;">
+      <div>
+        <div class="reveal">
+          <span class="text-lg text-gh-accent font-display" style="font-weight:600">メリット</span>
+        </div>
+        <p class="reveal reveal-d1 mt-3 font-display text-5xl font-900 tracking-tight leading-snug text-gh-text">ギブする人にこそ、商談が届く。</p>
+      </div>
+
+      
+      <div class="reveal reveal-d2 flex-1 flex items-center">
+        <img src="sakura-step-p1-B_v1_trim.png" alt="" style="width:100%;max-height:100%;object-fit:contain;object-position:left center;">
+      </div>
+      
+
+      
+
+      <div class="absolute bottom-6 right-8 text-xs text-gh-border font-display font-600">02 / 03</div>
+    </div>
+  </section>
+
+
+  <!-- SLIDE: Message + Image -->
+  <section class="slide" id="s3">
+    <div class="slide-inner bg-gh-bg " style="padding:40px 64px;">
+      <div>
+        <div class="reveal">
+          <span class="text-lg text-gh-accent font-display" style="font-weight:600">代表の想い</span>
+        </div>
+        <p class="reveal reveal-d1 mt-3 font-display text-5xl font-900 tracking-tight leading-snug text-gh-text">ギバーが報われる世界をつくりたい。</p>
+      </div>
+
+      
+      <div class="reveal reveal-d2 flex-1 flex items-center">
+        <img src="sakura-p3-C_v4_trim.png" alt="" style="width:100%;max-height:100%;object-fit:contain;object-position:left center;">
+      </div>
+      
+
+      
+
+      <div class="absolute bottom-6 right-8 text-xs text-gh-border font-display font-600">03 / 03</div>
+    </div>
+  </section>
+
+
+  </div><!-- /.slides-container -->
+
+  <script>
+    const container = document.getElementById('slidesContainer');
+    const slides = document.querySelectorAll('.slide');
+
+    // Reveal (IntersectionObserver on horizontal container)
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.08, root: container, rootMargin: '0px 50px 0px 50px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Force first slide visible immediately
+    requestAnimationFrame(() => {
+      const firstSlide = document.querySelector('.slide');
+      if (firstSlide) firstSlide.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    });
+
+    // Navigation dots (hidden, kept for compat)
+    const nav = document.getElementById('slideNav');
+    slides.forEach((s, i) => {
+      const a = document.createElement('a');
+      a.href = '#' + s.id;
+      a.title = 'Slide ' + (i + 1);
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        goToSlide(i);
+      });
+      nav.appendChild(a);
+    });
+    const navDots = nav.querySelectorAll('a');
+
+    const slideObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const idx = Array.from(slides).indexOf(entry.target);
+          navDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+          entry.target.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+        }
+      });
+    }, { threshold: 0.5, root: container });
+    slides.forEach(s => slideObserver.observe(s));
+
+    // Slide state
+    let currentIdx = 0;
+    let isAnimating = false;
+
+    function goToSlide(idx) {
+      idx = Math.max(0, Math.min(idx, slides.length - 1));
+      if (idx === currentIdx && container.scrollLeft === idx * window.innerWidth) return;
+      currentIdx = idx;
+      isAnimating = true;
+      const target = idx * window.innerWidth;
+      container.scrollTo({ left: target, behavior: 'smooth' });
+      setTimeout(() => {
+        if (Math.abs(container.scrollLeft - target) > 50) {
+          container.scrollLeft = target;
+        }
+        isAnimating = false;
+      }, 700);
+    }
+
+    // Sync currentIdx on manual scroll end
+    container.addEventListener('scrollend', () => {
+      currentIdx = Math.round(container.scrollLeft / window.innerWidth);
+      isAnimating = false;
+    });
+
+    // Keyboard
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleThumbs(); return; }
+      if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); return; }
+      if (e.key === 'Escape' && document.fullscreenElement) { document.exitFullscreen(); return; }
+      if (isAnimating) return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault(); goToSlide(currentIdx + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault(); goToSlide(currentIdx - 1);
+      }
+    });
+
+    // Mouse wheel
+    let wheelTimer = null;
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (isAnimating) return;
+      if (wheelTimer) return;
+      wheelTimer = setTimeout(() => { wheelTimer = null; }, 500);
+      if (e.deltaY > 0 || e.deltaX > 0) goToSlide(currentIdx + 1);
+      else if (e.deltaY < 0 || e.deltaX < 0) goToSlide(currentIdx - 1);
+    }, { passive: false });
+
+    // Fullscreen
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+      else document.exitFullscreen();
+    }
+    document.getElementById('fsBtn').addEventListener('click', toggleFullscreen);
+
+    
+
+    // ===== Thumbnail Panel =====
+    const thumbPanel = document.getElementById('thumbPanel');
+    const thumbToggle = document.getElementById('thumbToggle');
+
+    function renderThumbnails() {
+      thumbPanel.innerHTML = '';
+      
+
+      slides.forEach((slide, i) => {
+        const item = document.createElement('div');
+        item.className = 'thumb-item' + (i === currentIdx ? ' active' : '');
+
+        const num = String(i + 1).padStart(2, '0');
+        const inner = slide.querySelector('.slide-inner');
+        const bg = inner ? getComputedStyle(inner).backgroundColor : '#fff';
+
+        item.innerHTML = `
+          <div style="width:160px;height:90px;background:${bg};border-radius:4px;padding:8px 10px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:18px;font-weight:900;color:rgba(9,105,218,0.2);font-family:Inter,sans-serif;line-height:1">${num}</span>
+            </div>
+            <div style="display:flex;gap:3px;align-items:end;flex:1;padding-top:4px">
+              <div style="width:60%;height:3px;border-radius:1px;background:rgba(0,0,0,0.06)"></div>
+              <div style="width:40%;height:3px;border-radius:1px;background:rgba(9,105,218,0.1)"></div>
+            </div>
+          </div>`;
+
+        item.addEventListener('click', () => {
+          goToSlide(i);
+          updateActiveThumb(i);
+        });
+        thumbPanel.appendChild(item);
+      });
+    }
+
+    function updateActiveThumb(idx) {
+      thumbPanel.querySelectorAll('.thumb-item').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+    }
+
+    // Toggle panel -- closed by default
+    let thumbOpen = false;
+    renderThumbnails();
+    function toggleThumbs() {
+      thumbOpen = !thumbOpen;
+      thumbPanel.classList.toggle('open', thumbOpen);
+      const icon = document.getElementById('thumbToggleIcon');
+      if (icon) {
+        icon.innerHTML = thumbOpen
+          ? '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/>'
+          : '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/>';
+      }
+      if (thumbOpen) renderThumbnails();
+    }
+    thumbToggle.addEventListener('click', toggleThumbs);
+
+    // Update active thumb on slide change
+    const thumbObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const idx = Array.from(slides).indexOf(entry.target);
+          if (idx >= 0) updateActiveThumb(idx);
+        }
+      });
+    }, { threshold: 0.5, root: container });
+    slides.forEach(s => thumbObserver.observe(s));
+
+    // Scale slides to fill viewport
+    function updateScale() {
+      const scaleX = window.innerWidth / 1280;
+      const scaleY = window.innerHeight / 720;
+      const scale = Math.min(scaleX, scaleY);
+      const finalScale = document.fullscreenElement ? scale : scale * 0.96;
+      document.documentElement.style.setProperty('--slide-scale', finalScale);
+    }
+    updateScale();
+
+    window.addEventListener('resize', () => {
+      updateScale();
+      container.scrollLeft = currentIdx * window.innerWidth;
+    });
+  </script>
+</body>
+</html>
